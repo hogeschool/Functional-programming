@@ -1,0 +1,351 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+\usepackage{hrslides}
+\usepackage{graphicx}
+\usepackage[space]{grffile}
+\usepackage{listings}
+\lstset{language=C,
+basicstyle=\ttfamily\footnotesize,
+frame=shadowbox,
+mathescape=true,
+showstringspaces=false,
+showspaces=false,
+breaklines=true}
+\usepackage[utf8]{inputenc}
+
+\title{Intersection and union types}
+
+\author{Dr. Giuseppe Maggiore}
+
+\institute{Hogeschool Rotterdam \\ 
+Rotterdam, Netherlands}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\SlideSection{Introduction}
+\SlideSubSection{Lecture topics}
+\begin{slide}{
+\item Implicitly building inclusive data-structures with tuples
+\item Explicitly building inclusive data-structures with records
+\item Implicitly building exclusive data-structures with \texttt{Choice}
+\item Explicitly building exclusive data-structures with discriminated unions
+\item Pattern-matching
+}\end{slide}
+
+\SlideSubSection{Tuples}
+\begin{frame}[fragile]
+\begin{lstlisting}
+let i : int = 10
+
+let f : float = 3.0
+
+let g : float32 = 3.0f
+
+let b : bool = true
+
+let s : string = "Hi! I am a string. Hurr durr."
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let point : float * float = (3.0, 4.0)
+
+let twoStrings : string * string = s, "Another string!?!?!"
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let pointAndStrings : (float * float) * (string * string) = point, twoStrings
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type Point = float * float
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let get_x (p:Point) = 
+  let (x,y) = p
+  x
+
+let get_y (p:Point) = 
+  let (x,y) = p
+  y
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let (+) (p1:Point) (p2:Point) = 
+  let (x1,y1) = p1
+  let (x2,y2) = p2
+  x1+x2,y1+y2  
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec travel (p:Point) (v:Point) =
+  do printfn "%A" p
+  let _ = System.Console.ReadLine()
+  travel (p+v) v
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+travel (0.0,0.0) (1.0,0.0)
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Records}
+\begin{slide}{
+\item Sometimes tuples are not expressive enough
+\item \texttt{type Ship = Point * Point * float * float * float}
+\pause
+\item With \textit{records} we can give names to fields
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type Point = { X : float; Y : float }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let (+) (p1:Point) (p2:Point) = 
+  { X = p1.X + p2.X
+    Y = p1.Y + p2.Y }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec travel (p:Point) (v:Point) =
+  do printfn "%A" p
+  let _ = System.Console.ReadLine()
+  travel (p+v) v
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+travel { X = 0.0; Y = 0.0 } { X = 0.0; Y = 0.0 }
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Units of measure}
+\begin{slide}{
+\item Type constraints on records (and any other types, but less used)
+\item Units of measure: restrict composition on values of the same type
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type [<Measure>] m
+type [<Measure>] s
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type Point<[< Measure>] 'a>  = 
+  { X : float<'a>; Y : float<'a> }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let (*) (p:Point<'a>) (k:float<'b>) = 
+  { X = p.X * k
+    Y = p.Y * k }
+
+let (+) (p1:Point<'a>) (p2:Point<'a>) = 
+  { X = p1.X + p2.X
+    Y = p1.Y + p2.Y }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec travel (p:Point<m>) (v:Point<m/s>) (dt:float<s>) =
+  do printfn "%A" p
+  let _ = System.Console.ReadLine()
+  travel (p + v * dt) v dt
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+travel { X = 0.0<m>; Y = 0.0<m> }
+       { X = 1.0<m/s>; Y = 0.0<m/s> } 
+       0.1<s>
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type Point<[< Measure>] 'a>  = { X : float<'a>; Y : float<'a> }
+  with
+    static member (*) (p:Point<'a>, k:float<'b>) = 
+      { X = p.X * k
+        Y = p.Y * k }
+    static member (+) (p1:Point<'a>, p2:Point<'a>) = 
+      { X = p1.X + p2.X
+        Y = p1.Y + p2.Y }
+
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Discriminated unions}
+\begin{slide}{
+\item Tuples and records are many shapes joined into one
+\item Sometimes a value may take one out of multiple possible shapes
+\item We use \textit{discriminated unions in this case}
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type IntOrError = 
+  | Int of int
+  | Error of string
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let addPositive (x:IntOrError) (y:int) =
+  match x with 
+  | Int i -> Int(i + y)
+  | Error(e) -> Error(e)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let addPositive (x:IntOrError) (y:int) =
+  match x with 
+  | Int i -> 
+    let res = i + y
+    if res < 0 then
+      Error "Not positive!"
+    else
+      Int(res)
+  | Error(e) -> Error(e)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type ValueOrError<'T> = 
+  | Value of 'T
+  | Error of string
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let addPositive (x:ValueOrError<int>) (y:int) =
+  match x with 
+  | Value i -> 
+    let res = i + y
+    if res < 0 then
+      Error "Not positive!"
+    else
+      Value(res)
+  | Error(e) -> Error(e)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type Option<'T> = 
+  | Some of 'T
+  | None
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type WarpStatus =
+  | Charging of float<s>
+  | Charged
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type SpaceShip = {
+    Position   : Point<m>
+    Velocity   : Point<m/s>
+    WarpEngine : WarpStatus
+  }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec travel (s:SpaceShip) (dt:float<s>) =
+  do printfn "%A" s
+  let _ = System.Console.ReadLine()
+  match s.WarpEngine with
+  | Charging(timeLeft) when timeLeft > 0.0<s> ->
+    let s' =
+      { s with
+          Position   = s.Position + s.Velocity * dt
+          WarpEngine = Charging(timeLeft - dt) }
+    travel s' dt
+  | Charging(timeLeft) ->
+    let s' =
+      { s with
+          Position   = s.Position + s.Velocity * dt
+          WarpEngine = Charged }
+    travel s' dt
+  | Charged ->
+    let s' =
+      { s with
+          Position   = s.Position + s.Velocity * dt * 100.0
+          WarpEngine = Charging(10.0<s>) }
+    travel s' dt
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+do travel { Position   = { X = 0.0<m>; Y = 0.0<m> }
+            Velocity   = { X = 1.0<m/s>; Y = 0.0<m/s> } 
+            WarpEngine = Charged }
+          2.0<s>
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Conclusions and assignment}
+\begin{slide}{
+\item The assignments are on Natschool
+\item \textbf{Restore} the games to a working state
+\item Hand-in a \textbf{printed} report that only contains your \textbf{sources} and the associated \textbf{documentation}
+}\end{slide}
+
+\begin{slide}{
+\item Any book on the topic will do
+\item I did write my own (Friendly F\#) that I will be loosely following for the course, \textbf{but it is absolutely not mandatory or necessary to pass the course}
+}\end{slide}
+
+
+\begin{frame}{Dit is het}
+\center
+\fontsize{18pt}{7.2}\selectfont
+The best of luck, and thanks for the attention!
+\end{frame}
+
+\end{document}

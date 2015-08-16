@@ -1,0 +1,310 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+\usepackage{hrslides}
+\usepackage{graphicx}
+\usepackage[space]{grffile}
+\usepackage{listings}
+\lstset{language=C,
+basicstyle=\ttfamily\footnotesize,
+frame=shadowbox,
+mathescape=true,
+breaklines=true}
+\usepackage[utf8]{inputenc}
+
+\title{Functional programming introduction}
+
+\author{Dr. Giuseppe Maggiore}
+
+\institute{Hogeschool Rotterdam \\ 
+Rotterdam, Netherlands}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\SlideSection{Introduction}
+\SlideSubSection{Course introduction}
+\begin{slide}{
+\item This course is about \textit{functional programming} (FP)
+\item FP is a programming paradigm that focuses on data transformation instead of memory manipulation
+}\end{slide}
+
+\SlideSubSection{Other paradigms}
+\begin{slide}{
+\item Imperative programming (JavaScript, Java)
+\item OO programming (Java)
+\item Declarative programming (SQL)
+}\end{slide}
+
+\SlideSubSection{Imperative programming}
+\begin{slide}{
+\item Most used, most important programming tool nowadays
+\item Strongly connected to hardware
+\item CPU and memory are inherently imperative
+}\end{slide}
+
+\begin{slide}{
+\item Mostly focused on the notion of \textit{destructively updating \textbf{state}}
+\item \texttt{x = y;} loses (destroys) the previous value of \texttt{x}
+}\end{slide}
+
+\SlideSubSection{The risks of state}
+\begin{slide}{
+\item State and references cause undesired behaviours
+\item Each thread/function/class has pointers to shared state
+\item Each thread/function/class makes locally innocent modifications that as a whole break everything
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+money = 10000eur
+
+putMoney m =
+  newMoney := money + m
+  money    := newMoney
+  
+takeMoney m =
+  if money > m then
+    newMoney := money - m
+    money    := newMoney
+    return OK
+  else
+    return NOT_ENOUGH_BALANCE
+\end{lstlisting}
+\end{frame}
+
+\begin{slide}{
+\item \texttt{runParallel(takeMoney 10000, takeMoney 10000)} may return OK
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+for a in asteroids
+  if collision(a, projectiles)
+    remove(a, asteroids)
+  
+for p in projectiles
+  if collision(p, asteroids)
+    remove(p, projectiles)
+\end{lstlisting}
+\end{frame}
+
+\begin{slide}{
+\item Will never remove anything from \texttt{projectiles}!
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+static missileConnection = connect("192.168.1.1//nuke")
+
+class EmployeePayroll =
+  DoNotPayProgrammerBonuses : () -> () =
+    missileConnection.Launch()
+\end{lstlisting}
+\end{frame}
+
+\begin{slide}{
+\item Will cause WW3 if programmer bonuses are not paid
+}\end{slide}
+
+\begin{slide}{
+\item Concurrent updates are dangerous
+\item Creation of ``half processed'' states of the program which make no sense
+}\end{slide}
+
+\begin{slide}{
+\item Functions that return \texttt{void} may really do anything
+\item A function signature is meaningless
+\item We cannot prevent wrong composition of functions with libraries
+}\end{slide}
+
+
+\SlideSubSection{Referential transparency}
+\begin{slide}{
+\item One of the core tenets of FP
+\item Same input always yields same output
+\item Predictable code
+}\end{slide}
+
+\begin{slide}{
+\item How do we get this?
+\item We forbid...
+\pause
+\item MUTABLE VALUES!!!!!
+}\end{slide}
+
+\begin{slide}{
+\item Easier testing (only input values, not function order)
+\item Stronger encapsulation (less dependencies from order)
+\item Less chances of access mistakes (no way to access unrelated stuff)
+}\end{slide}
+
+\SlideSubSection{Introduction to ML}
+\begin{slide}{
+\item FP is very old
+\item First high-level programming language, in the 50's, was LISP (FP)
+\item Never been particularly popular
+\begin{itemize}
+\item It makes programming more difficult
+\item It \textit{seems} to yield better code on average
+\end{itemize}
+}\end{slide}
+
+\begin{slide}{
+\item We will use a dialect of ML (Meta-Language)
+\item Early 70's
+\item Hybrid programming language which discourages, but does not forbid, value mutation
+}\end{slide}
+
+\begin{slide}{
+\item We will use F\#
+\item Originally built by Microsoft
+\item Now fully open sourced
+\item Best debugger, tool, and library support of any other FP language
+\item Most other FP languages have ``academic quality'' (that is not very high) of tooling
+}\end{slide}
+
+\SlideSubSection{\texttt{let}}
+\begin{frame}[fragile]
+\begin{lstlisting}
+let (i:int) = 100
+
+let (x:float) = 10.0
+
+let (b:bool) = true
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let f (i:int) (j:int) : int = i + j
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let quadratic (a:float) (b:float) (c:float) (x:float) : float =
+  let t0 = c
+  let t1 = x * b
+  let t2 = x * x * a
+  t0 + t1 + t2
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let distance (x1:float,y1:float) (x2:float,y2:float) : float = 
+  let dx = x1-x2
+  let dy = y1-y2
+  System.Math.Sqrt(dx * dx + dy * dy)
+\end{lstlisting}
+\end{frame}
+
+
+\SlideSubSection{\texttt{if-then-else}}
+\begin{frame}[fragile]
+\begin{lstlisting}
+let tooCloseToZero (p:float * float) : bool =
+  if distance (0.0,0.0) p < 10.0 then
+    true
+  else
+    false
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{\texttt{match-with}}
+\begin{frame}[fragile]
+\begin{lstlisting}
+let someNumbers (i:int) : string =
+  match i with
+  | 0 -> "zero"
+  | 1 -> "one"
+  | 3 -> "three"
+  | 5 -> "five"
+  | 7 -> "seven"
+  | _ -> "number I don't like"
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{\texttt{let rec}}
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec fac (n:int) : int = 
+  if n = 0 then 
+    1
+  else
+    n * fac(n-1)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec fac (n:int) : int = 
+  match n with
+  | 0 -> 1
+  | _ -> n * fac(n-1)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec fac : int -> int = 
+  function
+  | 0 -> 1
+  | n -> n * fac(n-1)
+\end{lstlisting}
+\end{frame}
+
+
+\SlideSubSection{Conclusions and assignment}
+\begin{slide}{
+\item FP is a powerful programming paradigm
+\item Very different from imperative programming
+\item Functions are just ``data pumps''
+\begin{itemize}
+\item Data goes in
+\item No side-effects
+\item Data goes out
+\end{itemize}
+}\end{slide}
+
+\begin{slide}{
+\item The assignments are on Natschool
+\item \textbf{Restore} the games to a working state
+\item Hand-in a \textbf{printed} report that only contains your \textbf{sources} and the associated \textbf{documentation}
+}\end{slide}
+
+\begin{slide}{
+\item Any book on the topic will do
+\item I did write my own (Friendly F\#) that I will be loosely following for the course, \textbf{but it is absolutely not mandatory or necessary to pass the course}
+}\end{slide}
+
+
+\begin{frame}{Dit is het}
+\center
+\fontsize{18pt}{7.2}\selectfont
+The best of luck, and thanks for the attention!
+\end{frame}
+
+\end{document}
+
+
+\begin{slide}{
+\item Some data may be sent with less bits, as it changes less
+\item Some data may be sent in keyframes and incremental frames, if it changes incrementally
+\item If we know that datagrams have a certain statistical distribution, we can use Huffman encoding or other compression mechanisms
+}\end{slide}
+
+\begin{frame}{\CurrentSection}
+\center
+\includegraphics[height=5cm]{Pics/Huffman.png}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+
+\end{lstlisting}
+\end{frame}

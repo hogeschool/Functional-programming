@@ -1,0 +1,302 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+\usepackage{hrslides}
+\usepackage{graphicx}
+\usepackage[space]{grffile}
+\usepackage{listings}
+\lstset{language=C,
+basicstyle=\ttfamily\footnotesize,
+frame=shadowbox,
+mathescape=true,
+showstringspaces=false,
+showspaces=false,
+breaklines=true}
+\usepackage[utf8]{inputenc}
+
+\title{Records and abstract data types}
+
+\author{Dr. Giuseppe Maggiore}
+
+\institute{Hogeschool Rotterdam \\ 
+Rotterdam, Netherlands}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\SlideSection{Introduction}
+\SlideSubSection{Lecture topics}
+\begin{slide}{
+\item Abstract data types and interfaces as records of functions
+\item Abstract operations as requiring records of functions to work
+}\end{slide}
+
+\SlideSubSection{Generalising over operations}
+\begin{frame}[fragile]
+\begin{lstlisting}
+let add x y = x + y
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let a = add 1.0 2.0
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let b = add 1 2
+let c = add 1.0f 2.0f
+let d = add "one" "two"
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let add (+) x y = x + y
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let a = add (+) 1.0 2.0
+let b = add (+) 1 2
+let c = add (+) 1.0f 2.0f
+let d = add (+) "one" "two"
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let line (+) (*) a b x =
+  a * x + b
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let b = line (+) (*) 1.0 2.0 3.0
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let line (+) (*) a b x =
+  a * x + b
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let a = line (+) (*) 1 2 3
+let b = line (+) (*) 1.0 2.0 3.0
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Grouping operations together}
+\begin{slide}{
+\item Instead of the single operations, we could give a record of them
+\item This record is an abstraction over all the data types that will be able to support its operations
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type NumberOperations<'a> = 
+  { plus  : 'a -> 'a -> 'a
+    times : 'a -> 'a -> 'a }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let line ops a b x =
+  let (+) = ops.plus
+  let (*) = ops.times
+  a * x + b
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let intOps   : NumberOperations<int>   = { plus = (+); times = (*) }
+let floatOps : NumberOperations<float> = { plus = (+); times = (*) }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let a = line intOps 1 2 3
+let b = line floatOps 1.0 2.0 3.0
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Creating a library of abstract operations}
+\begin{slide}{
+\item \texttt{plus} and \texttt{times} really look the same
+\item We could build a record of operations for both of them
+\item \texttt{Number} is then two of these records of operations
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type Combine<'a> = { Empty : 'a; Append : 'a -> 'a -> 'a }
+  with static member Create z (+) = { Empty = z; Append = (+) }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let intPlus    = Combine<int>.Create 0 (+)
+let intTimes   = Combine<int>.Create 1 (*)
+let floatPlus  = Combine<float>.Create 0.0 (+)
+let floatTimes = Combine<float>.Create 1.0 (*)
+let stringPlus = Combine<string>.Create "" (+)
+let listPlus() = Combine<List<'a>>.Create [] (@)
+let setPlus()  = Combine<Set<'a>>.Create Set.empty (+)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let sumStuff ops a b c =
+  let (+) = ops.Append
+  a + b + c + c
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+sumStuff intPlus 10 20 30
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+sumStuff floatPlus 10.0 20.0 30.0
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+sumStuff stringPlus "a" "b" "c"
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+sumStuff (listPlus()) [1] [2] [3;4]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+sumStuff (listPlus()) ["1"] ["2"] ["3";"4"]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type Number<'a> = 
+  { Plus  : Combine<'a>
+    Times : Combine<'a> }
+  with static member Create p t = { Plus = p; Times = t }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let line ops a b x =
+  let (+) = ops.Plus.Append
+  let (*) = ops.Times.Append
+  a * x + b
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let intOps     = Number<int>.Create intPlus intTimes
+let floatOps   = Number<float>.Create floatPlus floatTimes
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let a = line intOps 1 2 3
+let b = line floatOps 1.0 2.0 3.0
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Creating an automated hierarchy of abstract operations}
+\begin{slide}{
+\item We can build generic combinators that transform our records of functions
+\item This allows us to \textbf{\textit{automatically}} extend our library
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let optionCombine (c:Combine<'a>) : Combine<Option<'a>> = 
+  Combine<Option<'a>>.Create (Some c.Empty) (fun (x) (y) -> match x, y with Some x, Some y -> Some(c.Append x y) | _ -> None)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let optionNumber (n:Number<'a>) : Number<Option<'a>> = 
+  Number<Option<'a>>.Create (optionCombine n.Plus) (optionCombine n.Times)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+line (intOps |> optionNumber) (Some 3) (Some 10) (Some 5)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let pairCombine (c1:Combine<'a>) (c2:Combine<'b>) : Combine<'a * 'b> = 
+  Combine<'a * 'b>.Create (c1.Empty, c2.Empty) (fun (x1,y1) (x2,y2) -> c1.Append x1 x2, c2.Append y1 y2)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let pairNumber (c1:Number<'a>) (c2:Number<'b>) : Number<'a * 'b> = 
+  Number<'a * 'b>.Create (pairCombine c1.Plus c2.Plus) (pairCombine c1.Times c2.Times)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+line (pairNumber intOps floatOps) (3, 1.0) (4, 2.0) (5, 6.0)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+line (pairNumber intOps floatOps |> optionNumber) (Some(3, 1.0)) (Some(4, 2.0)) (Some(5, 6.0))
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Conclusions and assignment}
+\begin{slide}{
+\item The assignments are on Natschool
+\item \textbf{Restore} the games to a working state
+\item Hand-in a \textbf{printed} report that only contains your \textbf{sources} and the associated \textbf{documentation}
+}\end{slide}
+
+\begin{slide}{
+\item Any book on the topic will do
+\item I did write my own (Friendly F\#) that I will be loosely following for the course, \textbf{but it is absolutely not mandatory or necessary to pass the course}
+}\end{slide}
+
+
+\begin{frame}{Dit is het}
+\center
+\fontsize{18pt}{7.2}\selectfont
+The best of luck, and thanks for the attention!
+\end{frame}
+
+\end{document}

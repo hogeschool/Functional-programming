@@ -1,0 +1,283 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+\usepackage{hrslides}
+\usepackage{graphicx}
+\usepackage[space]{grffile}
+\usepackage{listings}
+\lstset{language=C,
+basicstyle=\ttfamily\footnotesize,
+frame=shadowbox,
+mathescape=true,
+showstringspaces=false,
+showspaces=false,
+breaklines=true}
+\usepackage[utf8]{inputenc}
+
+\title{Accumulators, tail recursion, and continuation passing style}
+
+\author{Dr. Giuseppe Maggiore}
+
+\institute{Hogeschool Rotterdam \\ 
+Rotterdam, Netherlands}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\SlideSection{Introduction}
+\SlideSubSection{Lecture topics}
+\begin{slide}{
+\item Recursion uses the stack: we want to avoid stack overflow for deeply recursive problems
+\item Recursion lends itself well to backtracking: we will cache recurring computations
+\item Tail recursion can be automated with higher-order functions
+}\end{slide}
+
+\SlideSubSection{Accumulators and tail recursion}
+\begin{slide}{
+\item Recursion often uses the stack to store intermediate values
+\item Lots of intermediate values are then unwinded while popping the stack
+\item We can condense these values into an accumulator
+\item Compiler removes stack usage for such functions
+\item No stack overflow possible
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec fact n = 
+  match n with
+  | 0 -> 1
+  | _ -> n * fact (n-1)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let factAcc n = 
+  let rec aux n acc = 
+    match n with
+    | 0 -> acc
+    | _ -> aux (n-1) (n * acc)
+  aux n 1
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let sum l = 
+  let rec aux l acc = 
+    match l with
+    | [] -> acc
+    | x :: xs -> aux xs (x + acc)
+  aux l 0
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let mul l = 
+  let rec aux l acc = 
+    match l with
+    | [] -> acc
+    | x :: xs -> aux xs (x * acc)
+  aux l 1
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let reverse l = 
+  let rec aux l acc = 
+    match l with
+    | [] -> acc
+    | x :: xs -> aux xs (x :: acc)
+  aux l []
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let foldAcc z f l = 
+  let rec aux l acc = 
+    match l with
+    | [] -> acc
+    | x :: xs -> aux xs (f x acc)
+  aux l z
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let sum = foldAcc 0 (+)
+let mul = foldAcc 1 (*)
+let reverse = foldAcc [] (fun x xs -> x :: xs)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec fibo n =
+  match n with
+  | 0 -> 0
+  | 1 -> 1
+  | _ -> fibo (n-1) + fibo (n-2)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let fiboAcc n =
+  let rec aux n curr prev =
+    match n with
+    | 0 -> 0
+    | 1 -> curr
+    | _ -> 
+      aux (n-1) (curr+prev) curr
+  aux n 1 0
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Continuation passing style}
+\begin{slide}{
+\item We can automate the process of tail recursion
+\item We define our functions so that they take \texttt{k}, an additional parameter
+\item Instead of returning a result \texttt{x}, \textit{we give it to} \texttt{k} and return \texttt{k x}
+\item We may create a new \texttt{k} as an anonymous function within which recursive calls happen
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec factorialCPS n k = 
+  if n <= 1 then k n
+  else 
+    factorialCPS (n-1) (fun fac_n_min_1 -> k (n * fac_n_min_1))
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec fibonacciCPS n k = 
+  if n <= 1 then k n
+  else 
+    fibonacciCPS (n-1) (fun fib_n_min_1 -> 
+                            fibonacciCPS (n-2) (fun fib_n_min_2 -> 
+                                                    k (fib_n_min_1 + fib_n_min_2)))
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type Continuation<'a,'b> = ('a -> 'b) -> 'b
+
+let (>>=) (k1 : Continuation<'a,'b>) (k2 : 'a -> Continuation<'a1,'b>) : Continuation<'a1,'b> = 
+    fun (a1_to_b) -> k1 (fun a -> k2 a a1_to_b)
+
+let (!) (x:'a) : Continuation<'a,'b> = fun (k:'a -> 'b) -> k x
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec factCPSMonadic n =
+  if n <= 1 then !n
+  else
+    factCPSMonadic (n-1) >>= (fun n1 -> !(n * n1))
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec fibCPSMonadic n =
+  if n <= 1 then !n
+  else
+    fibCPSMonadic (n-1) >>= (fun n1 -> 
+    fibCPSMonadic (n-2) >>= (fun n2 ->
+    !(n1+n2)))
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Memoization}
+\begin{slide}{
+\item Inputs that are recurring have the same output
+\item Same input yields same output only with referential transparency
+\item We cache the results to avoid wasteful computation
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let fiboMem n =
+  let rec aux n mem =
+    match mem |> Map.tryFind n with
+    | Some res -> res,mem
+    | None ->
+      match n with
+      | 0 -> 0,mem
+      | 1 -> 1,mem
+      | _ -> 
+        let res1,mem'  = aux (n-1) mem
+        let res2,mem'' = aux (n-2) (mem' |> Map.add (n-1) res1)
+        res1 + res2,(mem'' |> Map.add (n-2) res2)
+  aux n Map.empty |> fst
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let store (cache:Ref<Map<'a,'b>>) k input output =
+  cache := cache.Value |> Map.add input output
+  k output
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let memoize (cache:Ref<Map<'a,'b>>) f input k =
+  match cache.Value |> Map.tryFind input with
+  | Some output -> k output
+  | None ->
+    f cache input k
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec fibonacciCPSMem (cache:Ref<Map<int,int>>) n k = 
+  if n <= 1 then store cache n n k
+  else 
+    memoize cache fibonacciCPSMem (n-1) 
+      (fun fib_n_min_1 -> 
+           memoize cache fibonacciCPSMem (n-2) 
+             (fun fib_n_min_2 -> 
+                   store cache n (fib_n_min_1 + fib_n_min_2) k))
+\end{lstlisting}
+\end{frame}
+
+
+\SlideSubSection{Course conclusions}
+\begin{slide}{
+\item In the next course we will continue on building abstractions like \texttt{(>>=)} and \texttt{(!)} or \texttt{store} and \texttt{memoize}
+\item We will also show how to combine such abstractions together
+\item While building a small compiler for F\# itself (a small subset)
+}\end{slide}
+
+
+\SlideSubSection{Conclusions and assignment}
+\begin{slide}{
+\item The assignments are on Natschool
+\item \textbf{Restore} the games to a working state
+\item Hand-in a \textbf{printed} report that only contains your \textbf{sources} and the associated \textbf{documentation}
+}\end{slide}
+
+\begin{slide}{
+\item Any book on the topic will do
+\item I did write my own (Friendly F\#) that I will be loosely following for the course, \textbf{but it is absolutely not mandatory or necessary to pass the course}
+}\end{slide}
+
+
+\begin{frame}{Dit is het}
+\center
+\fontsize{18pt}{7.2}\selectfont
+The best of luck, and thanks for the attention!
+\end{frame}
+
+\end{document}

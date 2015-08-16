@@ -1,0 +1,6 @@
+1. Write a simple type 3 language to parse integers.
+
+
+
+
+2. How many states does your type 3 language have?

@@ -1,0 +1,695 @@
+\documentclass[a4paper, 10pt]{article}
+
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\usepackage[pdftex]{graphicx}
+\usepackage{fancyhdr}
+\usepackage{paralist}
+\usepackage{sectionbox}
+\usepackage[english]{babel}
+\usepackage{chngcntr}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{makeidx}
+\usepackage{enumitem}
+\usepackage{listliketab}
+\usepackage[table]{xcolor}
+\usepackage{tabularx}
+\usepackage{epsfig}
+\usepackage{pdflscape}
+\usepackage{pdfpages}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\lstset{language=C,
+basicstyle=\ttfamily\footnotesize,
+frame=shadowbox,
+mathescape=true,
+showstringspaces=false,
+showspaces=false,
+breaklines=true}
+
+\newcommand{\HRule}{\rule{\linewidth}{1pt}}
+\newcommand{\organisatie}{\uppercase{Hogeschool Rotterdam / CMI}}
+\newcommand{\modulenaam}{Functional programming 2}
+\newcommand{\modulecode}{\uppercase{TINFUN02}}
+\newcommand{\stdPunten}{3}
+\renewcommand{\author}{Giuseppe Maggiore}
+
+\definecolor{lichtGrijs}{RGB}{169,169,169}
+
+\setlength\parindent{0pt}
+\makeindex
+\graphicspath{{img}}
+\counterwithin{figure}{subsection}
+\pagestyle{fancy}
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
+
+\fancyhf[HL]{\nouppercase{\textit{\leftmark}}}
+\setlength{\headheight}{36pt}
+\lhead{\uppercase{\footnotesize Module guide}}
+\chead{\footnotesize \organisatie}
+\rhead{\includegraphics[width=0.09\textwidth]{img/logo}}
+
+\lfoot{\scriptsize \modulenaam}
+\cfoot{\scriptsize \today}
+\rfoot{\small \thepage}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\makeindex
+
+\begin{document}
+\input{tex/Voorblad}
+
+\newpage
+\tableofcontents
+\newpage
+
+\shadowsectionbox
+
+\section{Introduction}
+This document describes the development of the fully new \textit{Functional programming II} course at \textit{Technische Informatica}, a department within the \textit{Communication and Multimedia Institute} of the \textit{Hogeschool Rotterdam}. 
+
+\subsection{Course background}
+The course is intended as an advanced subject for students who are completing their second year. The overall goal is that of strengthening the students' fundamental understanding of programming concepts by offering two new courses (\textit{Functional programming I} and \textit{Functional programming II}) that make use of a programming paradigm, functional programming. This paradigm is unfamiliar to students while at the same time being fundamentally connected with their previous programming knowledge, therefore offering a new perspective on programming as a whole. The students beginning the course have passed numerous exams of basic (imperative) programming and mathematics. Students are particularly used to an effective working and studying style when it comes to practical programming assignments: moreover, students are especially motivated when it comes to such practical assignments since their expectation is to become good programmers.
+
+
+
+\newpage
+
+\section{Schematic module description}
+\begin{tabularx}{\textwidth}{|>{\columncolor{lichtGrijs}} p{.26\textwidth}|X|}
+	\hline
+	\textbf{Module name:} & \modulenaam\\
+	\hline
+	\textbf{Module code: }& \modulecode\\
+	\hline
+	\textbf{Number of ECTS \newline and number of individual study hours:} & This module gives \stdPunten ECTS, which corresponds to 84 hours.
+	\begin{itemize}
+		\item 8 $\times$ 120 minutes frontal lecture
+		\item 8 $\times$ 120 minutes practicum
+		\item 12 $\times$ 120 minutes individual study
+	\end{itemize} \\
+	\hline
+	\textbf{Examination:} & Practical assignments \\
+	\hline
+	\textbf{Course structure:} & Lectures and practicums \\
+	\hline
+	\textbf{Required knowledge:} & The previous functional programming course. \\
+	\hline
+	\textbf{Learning tools:}  &
+		\begin{itemize}
+			\item Book: Types and Programming Languages, author: Benjamin Pierce
+			\item Book: Friendly F\# (Fun with game programming Book 1), author: Giuseppe Maggiore, Giulia Costantini
+			\item Text editors and IDE's: Emacs, Notepad++, Visual Studio, Xamarin Studio, etc.
+		\end{itemize} \\
+	\hline
+	\textbf{Content:}&
+	\begin{itemize}
+		\item The model of an interpreter and of a compiler;
+		\item Concepts of formal languages (Chomski hierarchy);
+		\item Type 3 and type 2 languages;
+		\item Monads as abstraction mechanisms for the management of complex operators such as those found in parser;
+		\item Type checking;
+		\item Concepts of denotational and operational semantics;
+		\item Interpretation;
+		\item Code generation.
+	\end{itemize}\\
+	\hline
+	\textbf{Module responsible:} & \author\\
+	\hline
+	\textbf{Date:} & \today \\
+	\hline
+\end{tabularx}
+
+\subsection{Learning goals}
+In this subsection we describe the learning goals, connected with Bloom's taxonomy.
+
+\begin{tabularx}{\textwidth}{|>{\columncolor{lichtGrijs}} p{.26\textwidth}|X|}
+	\hline
+	\textbf{Overall learning goal:}&
+		The student is able to describe, define, and then translate a programming language to a working interpreter or compiler. \\
+	\hline
+	\textbf{Analysis} & The student is able to distinguish the components of a programming language, that is: grammar, type system, and semantics  \\
+	\hline
+	\textbf{Advice} & The student is able to give advice over the design and realisation of a programming language (learning goal \textit{advice}) \\
+	\hline
+	\textbf{Creation} \footnote{Competence \textit{design} in the CMI handbook} & The student is able to design the structure and architecture of a functional interpreter or compiler (learning goal \textit{design}) \\
+	\hline
+	\textbf{Creation} \footnote{Competence \textit{realization} in the CMI handbook} & The student is able to build a working interpreter or compiler in an ML language (learning goal \textit{realization}) \\
+	\hline
+	\textbf{Evaluation} \footnote{Competence \textit{communication} in the CMI handbook} & The student is able to communicate in correct Dutch or English, using the correct jargon, about programming languages, compilers, interpreters, type systems, etc. (learning goal \textit{communication}). \\
+	\hline
+\end{tabularx}
+\newpage
+
+\section{General description and motivation}
+	The overall goal of the course is to provide a detailed answer to the questions:	
+	\begin{itemize}
+	\item \textbf{What is a programming language?}
+	\item \textbf{How does a programming language concretely work?}
+	\end{itemize}
+	
+	In this section we discuss further the full breadth of what the course covers, plus the desired level of skills achieved by the students. 
+	
+	\subsection{Introduction}
+		Students use programming languages as their most important tool to express and automate solutions to problems. During the first courses students learn programming language concepts from an intuitive standpoint. As a consequence of this intuition the use of programming languages by students is often superficial and unsure, because the fundamental questions of the inner working of languages remain unanswered \cite{intuitionInProgramming}. \\
+
+		The goal of the course is to provide a precise definition of the structure (grammar and type system) and interpretation (semantics) \cite{hopcroft_ullman, TAPL, SICP} of programming languages. Moreover, we shall learn how to translate this definition into a working interpreter or compiler written in a dialect of the ML \cite{ML} programming language. \\
+		
+		Through the knowledge acquired during this course students will gain awareness of the underlying mechanisms of programming languages. Moreover, students will become able to build their own programming languages (such as scripting languages, domain specific languages, etc.). \\
+		
+	\subsection{Relationship with competencies and professional profile}
+		The course strengthens for the most the competencies of \textbf{analysis, advice, design, and realization} within the area of \textbf{software development}. Implicitly the course also supports the competency of \textbf{process handling}, in that students are expected to organize their work-flow effectively. \\
+		
+		The final result is that this course will also strengthen the professional profile of students as software developers.
+		
+	\subsection{Relationship with other teaching units}
+		This module builds over the module of functional programming 1, and is also strongly connected with previous programming knowledge about imperative programming, algorithms, and data structures. Working understanding of basic mathematical reasoning is also a good supporting skill for this course. \\
+	
+	\subsection{Learning tools}
+		Obligatory:
+		\begin{itemize}
+			\item Presentations and sources presented during lectures (found on N@tschool);
+			\item Video's of lectures;
+			\item Assignments to work on during practicums (found on N@tschool);
+			\item Text editors: Emacs, Notepad++, Visual Studio, Xamarin Studio, etc.
+		\end{itemize}
+		Facultative:
+		\begin{itemize}
+			\item Book: Types and Programming Languages, author: B. Pierce;
+			\item Book: Semantics of Programming Languages, author: C. Gunter;
+			\item Book: Friendly F\# (Fun with game programming Book 1), authors: G. Maggiore, G. Costantini.
+		\end{itemize}
+
+\newpage
+\section{Lectures}
+	In this section the topics of the various lectures and the lecture structure is discussed. \\
+	Each lecture is roughly divided into a series of phases alternating listening, active participation, and formative feedback, as per the model(s) described in \cite{deeFink, berkelBax}. The phases are structured so that attention of the students is maximized through activity and participation. Moreover, through active assignments the students will regularly get formative feedback. This structure is also inspired by \cite{tenEasyWays}. \\
+		
+
+	\subsection{Course activities}
+		In this section we present a list of topics and activities, divided per-lecture. \\
+				
+{\small
+	\begin{tabular}{ | p{2.5cm} | p{2.5cm} | p{5cm} | p{2.5cm} | p{2.5cm} | }
+		\hline
+		\textbf{Lecture} & \textbf{Self-study} & \textbf{Lecture topics (3 hour each)} & \textbf{Lecture activities} & \textbf{Learning goals}\\
+		\hline
+		Structure of an interpreter and a compiler & & 				
+			Parsing $\rightarrow$ type checking $\rightarrow$ code generation $\rightarrow$ execution
+			& Discussion, formal lecture & analysis, advice \\
+		\hline
+		Parsing - part I & 
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item chapters 3 and 1 of the reader
+					\item assignments 0 and 1
+				\end{inparaenum} & 
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item Chomski's hierarchy
+					\item Type 3 languages (regular expressions)
+					\item State machine parser for regular expressions
+				\end{inparaenum}
+			& Discussion, formal lecture, practical exercises & analysis, advice, design, realization \\
+		\hline
+		Parsing - part II & 
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item chapter 3 of the reader
+					\item assignment 2A
+				\end{inparaenum} & 		
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item Type 2 languages
+					\item Pumping lemma (stack/recursion requirements for type 2 languages)
+					\item Data structures for an \textit{abstract syntax tree} (AST)
+					\item Recursive \textit{top-down} parser with \textit{look-ahead}
+				\end{inparaenum}
+			& Discussion, formal lecture, practical exercises, \textbf{handing-in of assignments 0 and 1} & analysis, advice, realization \\
+		\hline
+		Monads &
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item chapter 5 of book Friendly F\#
+					\item assignments 2B and 3
+				\end{inparaenum} & 		
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item Maybe
+					\item List
+					\item State
+					\item State + Maybe
+					\item State + List
+					\item State + List + Maybe
+					\item Parser monad
+				\end{inparaenum}
+			& Discussion, formal lecture, practical exercises, \textbf{handing-in of assignment 2A} & analysis, advice, realization \\
+		\hline
+		Type checking & 
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item chapters 8 and 9 of TAPL book
+					\item assignments 4 and 5
+				\end{inparaenum} & 		
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item Type systems
+					\item Type checking inference rules
+				\end{inparaenum}
+			& Discussion, formal lecture, practical exercises & analysis, advice, design, realization \\
+		\hline
+		Semantics & chapters 1 and 2 of SPL book & 
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item Interpretation
+					\item Code generation
+				\end{inparaenum}
+			& Discussion, formal lecture, practical exercises, \textbf{handing-in of assignments 2B and 3} & analysis, advice, design \\
+		\hline
+		Further static analyses: \textit{abstract interpretation} & &
+				\begin{inparaenum}[\itshape i\upshape)]
+					\item Approximation of semantics
+					\item Abstract domains
+					\item Galois connection
+				\end{inparaenum}
+			& Discussion, formal lecture, practical exercises, \textbf{handing-in of assignments 4, 5} & analysis, advice, communication \\
+		\hline
+		\textbf{Total hours:} & \textbf{63} & \textbf{21} & \\
+		\hline
+	\end{tabular}
+	}
+
+
+\newpage
+\section{Testing and evaluation}
+	In this section we discuss the testing procedure of this course, and the grading criteria.
+		
+	\subsection{Overall description}
+		\textbf{At the beginning of each lecture (with exclusion of the first) students will perform a very short, formative test.} The tests are made up of either a few (between three and five) multiple choice questions about the topics of the previous lecture or a discussion about the expectations over the topics of the coming lecture. This is done in order to cement and reinforce the knowledge needed for the new lecture, and to connect with the students expectations and previous knowledge. \\
+		
+		This module is also tested with a series of summative, practical assignments. The starting Visual Studio solutions for the assignments can be found on N@tschool. Since a purely theoretical handling of the course topics would be of little usefulness within our students' future jobs, we have chosen for an applied form of testing, in order to strengthen the students' programming competencies and add further applied skills to their toolbox. \\
+
+
+	\subsection{Practical (summative) assignments}
+		Foreword and notes:
+		\begin{itemize}
+			\item The practical assignments determine the final grade.
+			\item The practical assignments are made up of elements of an interpreter (or in he last assignment a compiler) which is either incomplete or wrongly built. The students task is that of extending or fixing such elements.
+			\item The practical assignments must contain extensive, individually written documentation.
+		\end{itemize}
+		\ \\
+		
+		This manner of examination is chosen for the following reasons:
+		\begin{itemize}
+			\item By reading existing sources students must read and reason about code (learning goals \textit{analysis} and \textit{advice}).
+			\item By correcting or extending the sources students must write code (learning goals \textit{design} and \textit{realisation}).
+			\item By writing documentation students must communicate about their code (learning goals \textit{analysis}, \textit{advice}, and \textit{communication}).
+		\end{itemize}
+
+		\ \\
+		The grade of each practicum assignment is determined by:
+		\begin{itemize}
+			\item The correctness of pure, functional code (use of \texttt{mutable} and \texttt{ref} is absolutely forbidden) (60\%).
+			\item Completeness and clarity of the documentation (20\%).
+			\item Use of functional programming patterns and idioms as seen during the lectures (20\%).
+		\end{itemize}
+
+
+		In this subsection the specific assignments are discussed. These assignments are summative, and make up the whole exam.
+	
+		\paragraph*{Assignment 0 - defining the tokens} (\textbf{handed in at the beginning of the third lecture})
+			Students must complete the definition of the \texttt{Token} data structure.
+			
+			\textbf{Grading criteria:} \\
+				\begin{tabularx}{\textwidth}{|>{\columncolor{lichtGrijs}} X | p{.8\textwidth}|}
+					\hline
+					\textbf{Criterion:} & \textbf{Requirements for criterion} \\
+					\hline
+					Coverage & Defined tokens must cover the whole expressions of the chosen language. \\
+					\hline
+					Readability & Defined tokens must have names that reflect standard naming conventions. \\
+					\hline
+					Encapsulation & Defined tokens must be grouped into data structures based on functionality. \\
+					\hline
+				\end{tabularx}			
+
+
+		\paragraph*{Assignment 1 - regular expressions parsing} (\textbf{handed in at the beginning of the third lecture})
+			Students must define a tokenizer function to parse the tokens of a small $\lambda$-calculus or \textbf{imp} program with a simple recursive function:
+			
+			\begin{lstlisting}
+let rec tokenize (l:List<char>) : List<Token> = ...
+			\end{lstlisting}
+
+
+			\textbf{Grading criteria:} \\
+				\begin{tabularx}{\textwidth}{|>{\columncolor{lichtGrijs}} X | p{.8\textwidth}|}
+					\hline
+					\textbf{Criterion:} & \textbf{Requirements for criterion} \\
+					\hline
+					Correctness & The parser must not crash, and produce the appropriate list of tokens. \\
+					\hline
+					Readability & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Functions and identifiers must have names that reflect standard naming conventions;
+							\item Indentation must clearly separate semantically different blocks of code.
+						\end{inparaenum} \\
+					\hline
+					Encapsulation & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Separate code blocks handle separate tokens;
+							\item Separate functionality is split into separate functions;
+							\item Long blocks are split into separate functions.
+						\end{inparaenum} \\
+					\hline
+				\end{tabularx}			
+
+		\paragraph*{Assignment 2A - type 2 parsing} (\textbf{handed in at the beginning of the fourth lecture})
+			Students must define a function to parse a small $\lambda$-calculus or \textbf{imp} program with a simple recursive function:
+
+			\begin{lstlisting}
+let rec parseTerm (ts:List<Token>) : Term * List<Token> = ...
+			\end{lstlisting}
+			
+			Students must also defined their own \texttt{Term} data structure as the parsing target.
+
+			\textbf{Grading criteria:} \\
+				\begin{tabularx}{\textwidth}{|>{\columncolor{lichtGrijs}} X | p{.8\textwidth}|}
+					\hline
+					\textbf{Criterion:} & \textbf{Requirements for criterion} \\
+					\hline
+					Coverage & Defined terms must cover the whole expressions of the chosen language. \\
+					\hline
+					Readability of terms & Defined terms must have names that reflect standard naming conventions. \\
+					\hline
+					Encapsulation of terms & Defined terms must be grouped into data structures based on functionality. \\
+					\hline
+					Correctness & The parser must not crash, and produce the appropriate hierarchical representation of terms. \\
+					\hline
+					Readability of code & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Functions and identifiers must have names that reflect standard naming conventions;
+							\item Indentation must clearly separate semantically different blocks of code.
+						\end{inparaenum} \\
+					\hline
+					Encapsulation of code & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Separate code blocks handle separate sub-terms;
+							\item Separate functionality is split into separate functions;
+							\item Long blocks are split into separate functions.
+						\end{inparaenum} \\
+					\hline
+				\end{tabularx}			
+			
+		\paragraph*{Assignment 2B - parsing with a parsing monad} (\textbf{handed in before the end of the last week of lecture})
+			Students must define a function to parse a small $\lambda$-calculus or \textbf{imp} program with a parsing monad:
+
+			\begin{lstlisting}
+let rec parseTerm : Parser<Term,List<Token>> = ...
+			\end{lstlisting}
+
+			\textbf{Grading criteria:} \\
+				\begin{tabularx}{\textwidth}{|>{\columncolor{lichtGrijs}} X | p{.8\textwidth}|}
+					\hline
+					\textbf{Criterion:} & \textbf{Requirements for criterion} \\
+					\hline
+					Monad laws & The parser monad must be correctly defined according to the monad laws. \\
+					\hline
+					Correctness & The parser monad produce the appropriate term hierarchy. \\
+					\hline
+					Readability & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Monadic combinators and identifiers must have names that reflect standard naming conventions;
+							\item Indentation must clearly separate semantically different blocks of code.
+						\end{inparaenum} \\
+					\hline
+					Encapsulation & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Separate code blocks handle separate tokens;
+							\item Type 3 and type 2 combinators are split into separate modules;
+							\item Separate parsing units are split into separate combinators;
+							\item Long blocks are split into separate functions.
+						\end{inparaenum} \\
+					\hline
+				\end{tabularx}			
+
+		\paragraph*{Assignment 3 - type system} (\textbf{handed in at the beginning of the sixth lecture})
+			Students must define a function to apply the rules of the type system of the $\lambda$-calculus or \textbf{imp} programming languages:
+
+			\begin{lstlisting}
+let rec typeCheck : Term -> Option<Type> = ...
+			\end{lstlisting}
+
+			Students must also defined their own \texttt{Type} data structure as the typing information container.
+
+			\textbf{Grading criteria:} \\
+				\begin{tabularx}{\textwidth}{|>{\columncolor{lichtGrijs}} X | p{.8\textwidth}|}
+					\hline
+					\textbf{Criterion:} & \textbf{Requirements for criterion} \\
+					\hline
+					Coverage & Defined types must cover the whole type system of the chosen language. \\
+					\hline
+					Readability of types & Defined types must have names that reflect standard naming conventions. \\
+					\hline
+					Encapsulation of types & Defined types must be grouped into data structures based on semantics. \\
+					\hline
+					Correctness & The type-checker must not crash, and produce the appropriate representation of types. \\
+					\hline
+					Readability of code & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Functions and identifiers must have names that reflect standard naming conventions;
+							\item Indentation must clearly separate semantically different blocks of code.
+						\end{inparaenum} \\
+					\hline
+					Encapsulation of code & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Separate code blocks handle separate sub-terms;
+							\item Separate functionality is split into separate functions;
+							\item Long blocks are split into separate functions.
+						\end{inparaenum} \\
+					\hline
+				\end{tabularx}			
+
+		\paragraph*{Assignment 4 - interpretation} (\textbf{handed in at the beginning of the eighth lecture})
+		    Students must define a function to determine the final result of the execution of the parsed program:
+
+			\begin{lstlisting}
+let rec eval (p:Term) : Result = ...
+			\end{lstlisting}
+
+			Students must also defined their own \texttt{Result} data structure as the evaluation result.
+
+			\textbf{Grading criteria:} \\			
+				\begin{tabularx}{\textwidth}{|>{\columncolor{lichtGrijs}} X | p{.8\textwidth}|}
+					\hline
+					\textbf{Criterion:} & \textbf{Requirements for criterion} \\
+					\hline
+					Coverage & Defined results must cover the whole possible results of the chosen language. \\
+					\hline
+					Correctness & The evaluation function must not crash, and produce the appropriate result. \\
+					\hline
+					Readability of code & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Functions and identifiers must have names that reflect standard naming conventions;
+							\item Indentation must clearly separate semantically different blocks of code.
+						\end{inparaenum} \\
+					\hline
+					Encapsulation of code & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Separate code blocks handle separate sub-terms;
+							\item Separate functionality is split into separate functions;
+							\item Long blocks are split into separate functions.
+						\end{inparaenum} \\
+					\hline
+				\end{tabularx}			
+			
+		\paragraph*{Assignment 5 - compilation} (\textbf{handed in before the end of the last week of lecture})
+			Students must define a function to write code that, when executed, shall determine the final result of the execution of the parsed program:
+						
+			\begin{lstlisting}
+let compileAndRun (p:Assignment2.Term) : obj = ...
+			\end{lstlisting}
+
+			\textbf{Grading criteria:} \\
+				\begin{tabularx}{\textwidth}{|>{\columncolor{lichtGrijs}} X | p{.8\textwidth}|}
+					\hline
+					\textbf{Criterion:} & \textbf{Requirements for criterion} \\
+					\hline
+					Correctness & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item The compilation function must not crash;
+							\item The resulting code must compile correctly;
+							\item The resulting code must have the same semantic interpretation of the original program.
+						\end{inparaenum} \\
+					
+					\hline
+					Readability of code & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Functions and identifiers must have names that reflect standard naming conventions;
+							\item Indentation must clearly separate semantically different blocks of code.
+						\end{inparaenum} \\
+					\hline
+					Encapsulation of code & 
+						\begin{inparaenum}[\itshape i\upshape)]
+							\item Separate code blocks handle separate sub-terms;
+							\item Separate functionality is split into separate functions;
+							\item Long blocks are split into separate functions.
+						\end{inparaenum} \\
+					\hline
+				\end{tabularx}			
+
+			
+	\subsection{Grades}
+		Assignments 0, 1, 2A, and 4 are strictly needed to get a passing grade. With these assignments the maximum grade possible is a seven. Assignments 2B, 3, and 5 each increase the maximum possible grade by one point. \\
+				
+		\paragraph*{Score of each assignment}
+			The scores of the assignments are calculated based on the expected time that we estimate each assignment will cost to the students. \\
+		
+\begin{figure}
+\center		
+\begin{tabular}{|p{3cm}|p{3cm}|}
+	\hline
+	\textbf{Assignments:} & \textbf{Value in grades} \\
+	\hline
+	0 & 1 \\
+	\hline
+	1 & 2 \\
+	\hline
+	2A & 2 \\
+	\hline
+	4 & 2 \\
+	\hline
+	2B & 1 \\
+	\hline
+	3 & 1 \\
+	\hline
+	5 & 1 \\
+	\hline
+\end{tabular}
+\end{figure}
+		
+		\paragraph*{Score and requirements}
+			Each requirement of each assignment is judged as either \textbf{fully correct} or \textbf{fully incorrect}. The total number of \textbf{fully correct} requirements is divided by the number of requirements and thus the \textbf{correct percentage} of the assignment is determined. The \textbf{correct percentage} is then multiplied by the score value of the assignment, and that is then multiplied by the value of the assignment.
+			
+			For example, consider assignment 2A. The number of requirements of the assignments is $6$. Assume that the student has completed the assignment with $4$. The score of the assignment is $2$, so the student gets a total of points for this assignment of:
+			
+			$$\frac{4}{6} \times {2} = 1.3$$
+			
+	\subsection{Handing-in}
+		Each assignment must be handed in printed on paper by the deadline indicated in the previous subsection for each assignment, either directly to the teacher or to the \textit{student-balie} of \textit{CMI}. On each assignment must be clearly specified and legible: the name of the student, his student number, and the course code the assignment refers to.
+
+	\subsection{Herkansing}
+		\textit{Herkansing} can be done by handing in the assignments before the end of week 1 of the following period (that would be right after the summer holiday).
+
+	\subsection{Feedback}
+		It is possible to discuss the assignments (and their evaluation) during the practicum lectures, or during week 10 of the period (the same holds for the \textit{herkansing}, but in reference to the following period).
+
+	\subsection{Quality, validity, and reliability}
+		In this subsection the quality of the exam is motivated: the validity of the content and concepts, the reliability, and the transparency of the exam are all discussed.
+
+		\paragraph*{Validity of content and concepts}
+			The overall goal of the course is to teach students how programming languages work. Since programming languages are clear technical products, then building a full interpreter or compiler (even for an apparently simple programming language) is sufficient to gain such an understanding. Moreover, wrong understanding of the theoretical concepts will most likely lead to practical mistakes, thus this form of testing is also more appropriate for adequate learning of (the consequences of) the theory.  \\
+		
+		\paragraph*{Coverage of goals}
+			The practical assignments cover the whole learning goals extensively (see Section \ref{sec:coordination}); this can be trivially verified by observing that a programming language is precisely made up of parsing (Assignments 0, 1, 2A, and 2B), type checking (Assignment 3), and execution (Assignments 4 and 5). This means that successful completion of the assignments corresponds to fulfillment of the learning goals. \\
+
+		\paragraph*{Transparency of grading criteria}
+			The grading criteria are, for the most part, rather objective. Correctness of the code can be verified empirically through testing \cite{testing} and implicitly thanks to the ML type checker \cite{TAPL}. This means that students know before hand whether or not their implementation works, and as such can already gauge their grade without having to expect surprises.
+
+			Documentation needs to be done according to the current standards for documentation of programming code \cite{literateProgramming}. Documentation must specify input and output conditions or invariants \cite{semanticsOfProgrammingLanguages}, and how these are connected by the code within each function. 
+			
+			Idioms are also very unambiguously specified. Functions and data structures must: \textit{(i)} adhere to the \textit{single responsibility principle} \cite{singleResponsibilityPrinciple}; and \textit{(ii)} be \textit{referentially transparent} \cite{referentialTransparency}. Both properties can be verified objectively and without appeal to intuition.
+
+\newpage
+
+\begin{thebibliography}{1}
+
+\bibitem{hopcroft_ullman} J. Hopcroft, J. Ullman, {\em Introduction to Automata Theory, Languages, and Computation}, Addison-Wesley, 1979.
+
+\bibitem{TAPL} B. Pierce, {\em Types and Programming Languages}, MIT Press, 2002.
+
+\bibitem{SICP} H. Abelson, G. J. Sussman, J. Sussman, {\em Structure and interpretation of computer programs}, MIT Press, 1996.
+
+\bibitem{ML} R. Milner, M. Tofte, R. Harper, {\em The Definition of Standard ML}, MIT Press, 1990.
+
+\bibitem{intuitionInProgramming} P. Naur, {\em Intuition in Software Development},  TAPSOFT, 1985.
+
+\bibitem{singleResponsibilityPrinciple} T. De Marco, {\em Structured Analysis and System Specification}, 1979.
+
+\bibitem{referentialTransparency} H. Søndergaard, P. Sestoft, {\em Referential transparency, definiteness and unfoldability}, Acta Informatica, 1990.
+
+\bibitem{semanticsOfProgrammingLanguages} C. Gunter, {\em Semantics of Programming Languages}, MIT Press, 1992.
+
+\bibitem{literateProgramming} D. E. Knuth, {\em Literate Programming}, Stanford University Center for the Study of Language and Information, 1992.
+
+\bibitem{testing} G. J. Myers, {\em The Art of Software Testing}, Wiley, 1979.
+
+\bibitem{monads} E. Moggi, {\em Notions of computation and monads}, Information and computation, 1991.
+
+\bibitem{monadic_parsing} G. Hutton, E. Meijer, {\em Monadic parsing in Haskell}, under consideration for publication in J. Functional Programming.
+
+\bibitem{programVerificationAndAnalysis} F. Nielson, H. R. Nielson, C. Hankin, {\em Principles of Program Analysis}, Springer, 1999.
+
+\bibitem{languagesAndCompilersCourse1} P. Hilfinger, A. Dave, {\em CS164 - Programming languages and compilers}, Berkeley University, 2015 edition.
+
+\bibitem{languagesAndCompilersCourse2} W. Weimer, {\em CS 4610 — Programming Languages}, University of Virginia, 2015 edition.
+
+\bibitem{languagesAndCompilersCourse3} M. Rinard, S. Amarasinghe, {\em Computer Language Engineering (SMA 5502)}, MIT, 2015 edition.
+
+\bibitem{berkelBax} H. Berkel, A. Bax, D. J. ten Brinke, {\em Toetsen in het hoger onderwijs}, Bohn Stafleu van Loghum, 2014.
+
+\bibitem{deeFink} L. Dee Fink, {\em Creating Significant Learning Experiences: An Integrated Approach to Designing College Courses}, Jossey-Bass, Wiley, 2003.
+
+\bibitem{tenEasyWays} T. Gray, L. Madson {\em Ten Easy ways To Engage Your Students}, College teaching 55, 2007.
+
+\end{thebibliography}
+\newpage
+
+
+\appendix
+
+\section{Examination matrix}
+\label{sec:coordination}
+The learning goals are covered orthogonally by the assignments. This means that each assignment requires the students to analyze, advise, design, realize, and communicate about a separate aspect of the analysis of programming languages:
+
+	\ \\
+
+	\begin{tabular}{|p{7cm}|p{3.5cm}|p{5cm}|}
+		\hline
+		Learning goal & Dublin descriptors & Assignments \\
+		\hline
+		The student is able to distinguish the components of a programming language, that is: grammar, type system, and semantics 
+			& 1, 5
+			& All \\
+		\hline
+        The student is able to give advice over the design and realisation of a programming language 
+        	& 1, 3, 5 
+        	& Documentation of 0, 2A, 4/5 \\
+		\hline
+		The student is able to design the structure and architecture of a functional interpreter or compiler 
+			& 1, 3, 4
+        	& 0, 2A/2B \\
+		\hline
+		The student is able to realise a working interpreter or compiler in an ML language 
+			& 2 
+			& 4, 5 \\
+		\hline
+		The student is able to communicate in correct Dutch or English, using the correct jargon, about programming languages, compilers, interpreters, type systems, etc. 
+			& 2 
+			& Documentation of all  \\
+		\hline
+	\end{tabular}
+	
+	\vspace{1cm}
+
+	Dublin-descriptors:
+	\begin{enumerate}
+		\item Knowledge and insight
+		\item Application of knowledge and insight
+		\item Making judgments
+		\item Communication
+		\item Learning skills
+	\end{enumerate}
+\newpage
+
+
+\printindex
+
+
+\end{document}

@@ -1,0 +1,448 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+\usepackage{hrslides}
+\usepackage{graphicx}
+\usepackage[space]{grffile}
+\usepackage{listings}
+\lstset{language=C,
+basicstyle=\ttfamily\footnotesize,
+frame=shadowbox,
+mathescape=true,
+showstringspaces=false,
+showspaces=false,
+breaklines=true}
+\usepackage[utf8]{inputenc}
+
+\title{Lists and higher-order functions}
+
+\author{Dr. Giuseppe Maggiore}
+
+\institute{Hogeschool Rotterdam \\ 
+Rotterdam, Netherlands}
+
+\date{}
+
+
+
+\begin{document}
+\maketitle
+
+\SlideSection{Introduction}
+\SlideSubSection{Lecture topics}
+\begin{slide}{
+\item Recursive definition of lists as union types
+\item Recursive traversal of lists with pattern matching
+\item Generalization of lists to multiple data types
+\item Generalization of list traversals
+}\end{slide}
+
+\SlideSubSection{Definition and basic traversals}
+\begin{frame}[fragile]
+\begin{lstlisting}
+type IntList =
+  | Empty
+  | Cons of int * IntList
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l = Cons(0, Cons(1, Cons(2, Empty)))
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec listBetween l u =
+  if l > u then Empty
+  else
+    Cons(l, listBetween (l+1) u)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let (++) h t = Cons(h, t)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l' = 0 ++ (1 ++ (2 ++ Empty))
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec listBetween' l u =
+  if l > u then Empty
+  else
+    l ++ listBetween' (l+1) u
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec length l =
+  match l with
+  | Empty -> 0
+  | Cons(h,t) -> 1 + length t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec sum l =
+  match l with
+  | Empty -> 0
+  | Cons(h,t) -> h + sum t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec product l =
+  match l with
+  | Empty -> 1
+  | Cons(h,t) -> h * sum t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec add k l =
+  match l with
+  | Empty -> Empty
+  | Cons(h,t) -> (h+k) ++ add k t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec mul k l =
+  match l with
+  | Empty -> Empty
+  | Cons(h,t) -> (h*k) ++ add k t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec negate l =
+  match l with
+  | Empty -> Empty
+  | Cons(h,t) -> (-h) ++ negate t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec removeEven l =
+  match l with
+  | Empty -> Empty
+  | Cons(h,t) when h % 2 = 0 -> removeEven t
+  | Cons(h,t) -> h ++ removeEven t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec removeOdd l =
+  match l with
+  | Empty -> Empty
+  | Cons(h,t) when h % 2 = 1 -> removeOdd t
+  | Cons(h,t) -> h ++ removeOdd t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec minElem l =
+  match l with
+  | Empty -> failwith "Empty list has no minimum element"
+  | Cons(h, Empty) -> h
+  | Cons(h,t) -> min h (minElem t)
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Generic lists}
+\begin{slide}{
+\item We have only seen lists of int's
+\item How about lists of strings, float's, tuples?
+\item How about lists of lists of tuples of lists?
+\item How about ...
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+type List<'T> =
+  | Empty
+  | Cons of 'T * List<'T>
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let (++) h t = Cons(h, t)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec length l =
+  match l with
+  | Empty -> 0
+  | Cons(h,t) -> 1 + length t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec sum l =
+  match l with
+  | Empty -> 0
+  | Cons(h,t) -> h + sum t
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Generic list traversals}
+\begin{slide}{
+\item There is a lot of repetition in the code above
+\item We wish to reduce this repetition
+\item We need to factor out the common parts, leaving the changing bits parameterized
+\item The parameterization is done with ``functions as parameters'' (called \textit{higher order functions})
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec map f l =
+  match l with
+  | Empty -> Empty
+  | Cons(h,t) -> (f h) ++ map f t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let add k l = map (fun x -> x + k) l
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let mul k l = map (fun x -> x * k) l
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let negate l = map (fun x -> -x) l
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec filter p l =
+  match l with
+  | Empty -> Empty
+  | Cons(h,t) when p h -> h ++ filter p t
+  | Cons(h,t) -> filter p t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let removeEven l = filter (fun x -> x % 2 = 0) l
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let removeOdd l = filter (fun x -> x % 2 = 1) l
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec fold z f l = 
+  match l with
+  | Empty -> z
+  | Cons(h,t) -> f h (fold z f t)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let sum l = fold 0 (fun x y -> x + y) l
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let product l = fold 1 (fun x y -> x * y) l
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let rec reduce f l = 
+  match l with
+  | Empty -> failwith "Cannot reduce empty list"
+  | Cons(h, Empty) -> h
+  | Cons(h,t) -> fold h f t
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let minElem l = reduce (fun x y -> min x y) l
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let maxElem l = reduce (fun x y -> max x y) l
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Generic generic list traversals}
+\begin{slide}{
+\item \texttt{fold} is the most powerful of the list traversals we have seen so far
+\item It is so powerful that \texttt{map} and \texttt{filter} can be expressed as \texttt{fold}s
+\item (\texttt{reduce} is already expressed as a \texttt{fold})
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let map f l = fold Empty (fun h t -> Cons(f h,t)) l
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let filter p l = fold Empty (fun h t -> if p h then Cons(h,t) else t) l
+\end{lstlisting}
+\end{frame}
+
+\SlideSubSection{Built-in lists and sequences}
+\begin{slide}{
+\item F\# has built-in lists and lazy lists
+\item They have type \texttt{List<'a>} and \texttt{Seq<'a>}
+\item Plus a huge library of combinator functions
+\item Plus shortcut syntax for some combinators
+}\end{slide}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l = [1..100]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l = List.map (fun i -> i * i) [1..100]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l =
+  [
+    for i = 1 to 100 do 
+    yield i * i
+  ]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l = List.filter (fun i -> i % 2 = 0) (List.map (fun i -> i * i) [1..100])
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l = [1..100] |> List.map (fun i -> i) |> List.filter (fun i -> i % 2 = 0)
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l =
+  [
+    for i = 1 to 100 do 
+      if i % 2 = 0 then
+        yield i * i
+  ]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l =
+  [
+    for i = 1 to 100 do 
+    yield i * i
+  ]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l =
+  [
+    for i = 1 to 100 do 
+    for j = 1 to 100 do 
+    yield i,j
+  ]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l =
+  [
+    for i = 1 to 100 do 
+      if i % 2 = 0 then
+        for j = 1 to 100 do 
+          if j > i then
+            yield i,j
+  ]
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+\begin{lstlisting}
+let l =
+  seq{
+    for i = 1 to 100 do 
+      if i % 2 = 0 then
+        for j = 1 to 100 do 
+          if j > i then
+            yield i,j
+  }
+\end{lstlisting}
+\end{frame}
+
+
+
+\SlideSubSection{Conclusions and assignment}
+\begin{slide}{
+\item The assignments are on Natschool
+\item \textbf{Restore} the games to a working state
+\item Hand-in a \textbf{printed} report that only contains your \textbf{sources} and the associated \textbf{documentation}
+}\end{slide}
+
+\begin{slide}{
+\item Any book on the topic will do
+\item I did write my own (Friendly F\#) that I will be loosely following for the course, \textbf{but it is absolutely not mandatory or necessary to pass the course}
+}\end{slide}
+
+
+\begin{frame}{Dit is het}
+\center
+\fontsize{18pt}{7.2}\selectfont
+The best of luck, and thanks for the attention!
+\end{frame}
+
+\end{document}

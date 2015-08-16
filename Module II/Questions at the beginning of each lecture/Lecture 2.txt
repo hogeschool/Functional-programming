@@ -1,0 +1,12 @@
+1. List the different elements of an interpreter.
+
+
+
+
+2. Give an example of the type system of any programming language in action.
+
+
+
+
+3. Consider the semantics of a simple, imperative programming language. Describe in words or give formally the semantics of variable assignment.
+Hint: the semantics is a function s -> s, where s is the state of the program.

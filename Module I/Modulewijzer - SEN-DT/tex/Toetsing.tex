@@ -1,0 +1,60 @@
+\section{Toetsing en beoordeling}
+	\subsection{Procedure}
+		Deze module wordt getoetst middels en schriftelijke toets en een aantal practicumopdrachten. De practicum opdrachten zijn te vinden op N@tschool.
+
+		Voorwaarden en uitgangspunten:
+		\begin{itemize}
+			\item De schriftelijke toets is alleen voldoende of onvoldoende (voldoende bij cijfer hoger dan vier)
+			\item De practicumopdrachten bepalen het eindcijfer, uitsluitend als de schriftelijke toets is voldoende.
+			\item De practicumopdrachten bestaan uit een game/simulatie voorbeeld die is niet compleet of foutieve; studenten moeten elke voorbeeld uitbreiden of corrigeren totdat het werkt volgens de opdracht beschrijving.
+			\item De practicumopdrachten moeten documentatie bevatten.
+		\end{itemize}
+		\ \\
+		
+		Voor deze manier van toetsen is gekozen om de volgende redenen:
+		\begin{itemize}
+			\item Door de gegeven bronnen studenten moeten code lezen en begrijpen (leerdoel A).
+			\item Door deze bronnen te corrigeren of invullen moeten studenten code schrijven (leerdoel O).
+			\item Door documentatie schrijven moeten studenten communiceren over hun code (leerdoel C).
+		\end{itemize}
+
+		De cijfer van elke practicum opdracht is bepaald door:
+		\begin{itemize}
+			\item Correctheid van puur, functionele code (gebruik van \texttt{mutable} and \texttt{ref} is verboden) (60\%).
+			\item Compleetheid en helderheid van documentatie (20\%).
+			\item Gebruik van functionele patronen en idiomen zoals gezien in de lessen (20\%).
+		\end{itemize}
+
+	\subsection{Opdrachten}
+	
+		\paragraph{Opdracht 1 - let, expressies, definitie van functies}
+			Studenten moeten twee functies definiëren om de positie en snelheid van een object te bewerken. De eindresultaat is dat het object door het scherm valt met zwaartekrachtversnelling.
+
+		\paragraph{Opdracht 2 - tupels, if's}
+			Studenten moeten één enkele functie definiëren om de positie en snelheid van een object te bewerken. De functie retourneert een tupels met twee elementen: de nieuwe positie en de nieuwe snelheid van het object. Als het object de rand van het scherm raakt, dan moet hij opspringen.
+			
+		\paragraph{Opdracht 3 - records}
+			Studenten moeten twee records definiëren: \texttt{Vector2} en \texttt{MovingObject}. De \texttt{MovingObject} record bevat de positie en de snelheid van een object. Positie en snelheid zijn instanties van \texttt{Vector2}. Het object moet bewerkt worden zoals in \textit{Opdracht 2}, maar nu met 2D beweging.
+			
+		\paragraph{Opdracht 4 - lijsten, pattern matching}
+			Studenten moeten een recursieve functie definiëren om een lijst van \texttt{MovingObject}'s te bewerken. De functies van \textit{Opdracht 3} mogen gebruikt worden. Objecten die vallen buiten de randen van het scherm moeten van de lijst verwijdert worden.
+			
+		\paragraph{Opdracht 5 - lijsten, hogere orde functies}
+			Studenten moeten de functie van \textit{Opdracht 4} weer schrijven, maar door:
+				\begin{itemize}
+					\item eigen \texttt{map} en \texttt{filter} functies
+					\item de standaard \texttt{map} en \texttt{filter} functies
+				\end{itemize}
+
+		\paragraph{Opdracht 6 - som types}
+			Studenten moeten een 2D zoekboom (\textit{quadtree}) definiëren. Door dit zoekboom wordt het bepalen van collisies tussen kogels en asteroïden veel sneller ($O(N \log_4 N)$ in plaats van $O(N^2)$).
+			
+		\paragraph{Opdracht 7 - abstracte datatypes (optioneel)}
+			Studenten moeten een generieke collisie detectie functie. De functie bepaalt collisies tussen verschillende soorten van objecten. Om de vorm en positie van de objecten te bepalen gebruiken we een record van functies die specificeert hoe de generieke objecten uitgepakt moeten worden.
+			
+		\paragraph{Opdracht 8 - continuation passing style (CPS) (optioneel)}
+			Studenten moeten twee kleine CPS functies schrijven: \texttt{faculteit} en \texttt{fibonacci}. Studenten moeten ook de zoekprocedure van \textit{Opdracht 6} weer schrijven met een variant van CPS die maakt het mogelijk om de procedure uit te voeren tot een aantal stappen (\textit{delayed/concurrent execution}).
+			
+	\subsection{Cijfers}
+		De eerste vier opdrachten zijn verplicht. Met deze opdrachten het is mogelijk om een cijfer van zes te krijgen. Opdrachten vijf en zes zijn uitsluitend geldig als de eerste vier opdrachten zijn correct. Met opdrachten vijf en zes het is mogelijk om een cijfer van tien te krijgen. De laatste opdrachten zijn optionele voor extra punten.
+		
